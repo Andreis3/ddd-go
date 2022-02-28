@@ -2,6 +2,7 @@
 package services
 
 import (
+	"context"
 	"log"
 
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 	"github.com/santos/ddd-go/aggregate"
 	"github.com/santos/ddd-go/domain/customer"
 	"github.com/santos/ddd-go/domain/customer/memory"
+	"github.com/santos/ddd-go/domain/customer/mongo"
 	"github.com/santos/ddd-go/domain/product"
 	prodMemory "github.com/santos/ddd-go/domain/product/memory"
 )
@@ -54,6 +56,18 @@ func WithMemoryCustomerRepository() OrderConfiguration {
 	// Create the memory repo, if we needed parameters, such as connection strings they could be inputted here
 	cr := memory.New()
 	return WithCustomerRepository(cr)
+}
+
+func WithMongoCustomerRepository(connectionString string) OrderConfiguration {
+	return func(os *OrderService) error {
+		// Create the mongo repo, if we needed parameters, such as connection strings they could be inputted here
+		cr, err := mongo.New(context.Background(), connectionString)
+		if err != nil {
+			return err
+		}
+		os.customers = cr
+		return nil
+	}
 }
 
 // CreateOrder will chaintogether all repositories to create a order for a customer
